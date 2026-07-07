@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - NewMUN VIII</title>
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+    <style>
+        /* Global Reset & Core Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family:apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        }
+
+        :root {
+            --white: #FFFFFF;
+            --off-white: #F4F7FA;         
+            --palette-sky: #0886fd;       
+            --palette-indigo: #1c007c;    
+            --palette-royal: #0108b4;     
+            --palette-midnight: #06090f;  
+            
+            --text-main: var(--palette-midnight);
+            --text-muted: #4A5568;
+            --border-clean: rgba(1, 8, 180, 0.08);
+            
+            /* Inverted Box Highlight Palette */
+            --highlight-bg: var(--palette-indigo);
+            --highlight-text: var(--white);
+        }
+
+        body {
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-color: var(--white);
+            background-image: radial-gradient(rgba(1, 8, 180, 0.04) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            position: relative;
+        }
+
+        /* --- WATERMARK / BACKGROUND LOGO --- */
+        #scrollingWatermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw; 
+            max-width: 600px;
+            height: 60vw;
+            max-height: 600px;
+            background-image: url('assets/logo.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0; 
+            z-index: -1; 
+            pointer-events: none; 
+            transition: opacity 0.5s ease-in-out; 
+        }
+
+        /* Visible modifier class managed via scroll script */
+        #scrollingWatermark.visible {
+            opacity: 0.15; 
+        }
+
+        /* --- GPU-ACCELERATED KEYFRAMES --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- SCROLL REVEAL UTILITY CLASSES --- */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, opacity;
+        }
+
+        .reveal-element.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- FLOATING NAVBAR STYLES --- */
+        nav {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1300px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.85rem 2.5rem;
+            border-radius: 100px;
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 30px rgba(6, 9, 15, 0.02), 0 1px 0px rgba(255, 255, 255, 0.6) inset;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            min-height: 62px;
+        }
+
+        nav.scrolled {
+            top: 12px;
+            width: 95%;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 0.65rem 2rem;
+            box-shadow: 0 10px 40px rgba(6, 9, 15, 0.06);
+        }
+
+        nav .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--palette-midnight);
+            text-decoration: none;
+        }
+
+        nav .logo img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            background: transparent;
+        }
+
+        nav .logo span {
+            color: var(--palette-royal);
+        }
+
+        .nav-menu-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin: 0 0.3rem; 
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+            padding: 8px 16px; 
+            border-radius: 50px;
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            display: inline-block;
+        }
+
+        nav ul li a:hover {
+            color: var(--palette-midnight);
+            border-color: rgba(0, 0, 0, 0.12);
+            background-color: rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+        }
+
+        .nav-utilities {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(8, 134, 253, 0.06);
+            border: 1px solid rgba(8, 134, 253, 0.15);
+            padding: 0.45rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: var(--palette-sky);
+        }
+
+        .status-indicator-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--palette-sky);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-indicator-dot::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--palette-sky);
+            border-radius: 50%;
+            animation: beaconPulse 2s infinite ease-out;
+        }
+
+        @keyframes beaconPulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3.5); opacity: 0; }
+        }
+
+        .nav-utilities .btn-nav-compact {
+            padding: 0.55rem 1.4rem;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(1, 8, 180, 0.12);
+            background-color: var(--palette-royal);
+            color: var(--white);
+            border: 2px solid var(--palette-royal);
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-utilities .btn-nav-compact:hover {
+            background-color: transparent;
+            color: var(--palette-royal);
+            border-color: var(--palette-royal);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(1, 8, 180, 0.12);
+        }
+
+        #menu-toggle { display: none; }
+        .hamburger-label { display: none; cursor: pointer; flex-direction: column; justify-content: space-between; width: 22px; height: 16px; z-index: 1020; }
+        .hamburger-label span { display: block; height: 2px; width: 100%; background-color: var(--palette-midnight); border-radius: 2px; transition: all 0.3s ease; }
+
+        /* --- HERO HEADER BANNER --- */
+        .gallery-hero {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            display: flex;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            background: linear-gradient(to bottom, rgba(8, 134, 253, 0.12) 0%, rgba(244, 247, 250, 0.6) 70%, transparent 100%) !important;
+            min-height: 55vh; 
+        }
+
+        .title-rectangle-plate {
+            width: 100%;
+            background-color: transparent !important;
+            background-image: linear-gradient(rgba(1, 8, 180, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(1, 8, 180, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--palette-midnight);
+            padding: 190px 10% 5rem 10% !important;
+            text-align: center;
+            border-bottom: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 30px rgba(6, 9, 15, 0.01);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+            position: relative;
+        }
+
+        .title-rectangle-plate::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--palette-sky), var(--palette-royal), var(--palette-sky));
+        }
+
+        .title-rectangle-plate h1 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--palette-indigo);
+            margin-bottom: 0.6rem;
+        }
+
+        .title-rectangle-plate p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            max-width: 800px;
+            margin: 0 auto;
+            letter-spacing: 0.3px;
+        }
+
+        /* --- SECTIONS MATRIX --- */
+        .section {
+            padding: 6rem 10%;
+            max-width: 1440px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.3rem;
+            font-weight: 800;
+            margin-bottom: 4.5rem;
+            color: var(--palette-midnight);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--palette-sky);
+            border-radius: 2px;
+        }
+
+        .section-subtitle-pill {
+            display: block;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--palette-sky);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.8rem;
+        }
+
+        /* --- GALLERY GRID SYSTEM (2 CARDS PER ROW) --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            width: 100%;
+        }
+
+        /* --- ENLARGED CARD MATCHING COUNCILS.HTML --- */
+        .gallery-card {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 2.8rem 2.5rem;
+            border-radius: 20px; 
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 6px 25px rgba(6, 9, 15, 0.02);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--palette-sky);
+            background-color: var(--white);
+            box-shadow: 0 20px 40px rgba(1, 8, 180, 0.07);
+        }
+
+        .gallery-image-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--off-white);
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-clean);
+        }
+
+        .gallery-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .gallery-card:hover .gallery-image-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .gallery-details {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .gallery-details h3 {
+            font-size: 1.6rem;
+            color: var(--palette-indigo);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        /* --- OUTLINE BUTTON MATCHING COUNCILS.HTML --- */
+        .btn-open {
+            width: 100%;
+            background-color: transparent;
+            color: var(--palette-sky);
+            border: 2px solid var(--palette-sky);
+            padding: 0.85rem 1.8rem;
+            border-radius: 50px; 
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .gallery-card:hover .btn-open {
+            background-color: var(--palette-sky);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(8, 134, 253, 0.15);
+        }
+
+        /* --- INSTITUTIONAL FOOTER LAYOUT --- */
+        footer {
+            background-color: var(--palette-midnight);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: left; 
+            padding: 5rem 10% 3rem 10%;
+            border-top: 4px solid var(--palette-royal);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(3, 1fr);
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand h2 {
+            color: var(--white);
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 300px;
+            line-height: 1.6;
+        }
+
+        .footer-links-col h3 {
+            color: var(--white);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-links-col ul {
+            list-style: none;
+        }
+
+        .footer-links-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links-col ul li a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links-col ul li a:hover {
+            color: var(--palette-sky);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        footer strong {
+            color: var(--white);
+        }
+
+        /* --- RESPONSIVENESS OVERRIDES --- */
+        @media (max-width: 1200px) {
+            .section { padding: 6rem 8%; }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
+            .title-rectangle-plate h1 { font-size: 2.8rem; }
+        }
+
+        @media (max-width: 1024px) {
+            .status-pill { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid { grid-template-columns: 1fr !important; }
+            nav { top: 0 !important; width: 100% !important; border-radius: 0; border-inline: none; padding: 1rem 6%; }
+            .hamburger-label { display: flex; }
+            .nav-menu-wrapper {
+                position: fixed;
+                top: -100vh; left: 0; width: 100%; height: 100vh;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                gap: 30px;
+                transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1005;
+            }
+            nav ul { flex-direction: column; gap: 20px; }
+            nav ul li { margin: 0; }
+            nav ul li a { font-size: 1.1rem; padding: 10px 24px; }
+            .nav-utilities { flex-direction: column; }
+            #menu-toggle:checked ~ .nav-menu-wrapper { top: 0; }
+            #menu-toggle:checked ~ .hamburger-label span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+            #menu-toggle:checked ~ .hamburger-label span:nth-child(2) { opacity: 0; }
+            #menu-toggle:checked ~ .hamburger-label span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        }
+
+        @media (max-width: 650px) {
+            .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+            .title-rectangle-plate { padding: 140px 6% 3.5rem 6% !important; }
+            .title-rectangle-plate h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scrollingWatermark"></div>
+
+    <nav id="mainNavbar">
+        <a href="index.html" class="logo">
+            <img src="assets/logo.png" alt="New MUN Logo">
+            NewMUN VIII
+        </a>
+        
+        <input type="checkbox" id="menu-toggle">
+        <label for="menu-toggle" class="hamburger-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
+        <div class="nav-menu-wrapper">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="councils.html">Councils</a></li>
+                <li><a href="oc.html">The OC</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+            </ul>
+            
+            <div class="nav-utilities">
+                <div class="status-pill">
+                    <span class="status-indicator-dot"></span>
+                    Seats Open 2026
+                </div>
+                <a href="index.html#committees" class="btn btn-nav-compact">Apply</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="gallery-hero" id="gallery-header" >
+        <div class="title-rectangle-plate" style="background-image: url('assets/bg.gif');background-size: cover; background-position: center; background-repeat: no-repeat; width: 100%; height: 500px;">
+            <h1 style="color: white;">Gallery</h1>
+            <p style="color: white;">Explore visual captures, retrospective highlights, and memorable diplomatic milestones from the conference.</p>
+        </div>
+    </header>
+
+    <section class="section reveal-element" id="conference-gallery-tier">
+        <span class="section-subtitle-pill">Visual Retrospective</span>
+        <h2 class="section-title">Conference Chapters</h2>
+        
+        <div class="gallery-grid">
+            <div class="gallery-card">
+                <div class="gallery-image-wrapper">
+                    <img src="assets/opening_ceremony.jpg" alt="Opening Ceremony">
+                </div>
+                <div class="gallery-details">
+                    <h3>Opening Ceremony</h3>
+                    <a href="#" class="btn-open">Open &rarr;</a>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="gallery-image-wrapper">
+                    <img src="assets/councils.jpg" alt="Councils">
+                </div>
+                <div class="gallery-details">
+                    <h3>Councils</h3>
+                    <a href="#" class="btn-open">Open &rarr;</a>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="gallery-image-wrapper">
+                    <img src="assets/award_ceremony.jpg" alt="Award Ceremony">
+                </div>
+                <div class="gallery-details">
+                    <h3>Award Ceremony</h3>
+                    <a href="#" class="btn-open">Open &rarr;</a>
+                </div>
+            </div>
+
+            <div class="gallery-card">
+                <div class="gallery-image-wrapper">
+                    <img src="assets/closing_ceremony.jpeg" alt="Closing Ceremony">
+                </div>
+                <div class="gallery-details">
+                    <h3>Closing Ceremony</h3>
+                    <a href="#" class="btn-open">Open &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="mainFooter">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <img src="assets/logo.png" alt="" width="64">
+                <h2>NewMUN VIII</h2>
+                <p>Empowering the next generation of leaders through debate, diplomacy, and collaboration.</p>
+            </div>
+            <div class="footer-links-col">
+                <h3>Main Pages</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="councils.html">Councils</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="#resources">Senior Councils Allocation</a></li>
+                    <li><a href="#resources">Junior Councils Allocation</a></li>
+                    <li><a href="#resources">Itinerary</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h3>The Organisers</h3>
+                <ul>
+                    <li><a href="index.html#principal">Principal's Message</a></li>
+                    <li><a href="oc.html">The OC</a></li>
+                    <li><a href="https://instagram.com/">Instagram Page</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 NewMUN VIII. All rights reserved.</p>
+            <p>Designed by Atharva</p>
+        </div>
+    </footer>
+
+    <script>
+        // 1. CENTRALIZED NAVBAR INJECTOR ENGINE
+        async function loadCentralNavbar() {
+            try {
+                const response = await fetch('navbar.html');
+                if (!response.ok) throw new Error('Shared Navbar component file could not be fetched.');
+                const htmlContent = await response.text();
+                const targetShell = document.getElementById('mainNavbar');
+                targetShell.innerHTML = htmlContent;
+
+                const toggleCheckbox = document.getElementById('menu-toggle');
+                document.querySelectorAll('nav ul li a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if(toggleCheckbox.checked) toggleCheckbox.checked = false;
+                    });
+                });
+            } catch (err) {
+                console.error("Navbar Injection Error: ", err);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadCentralNavbar);
+
+        // 2. Dynamic Scroll Reveal Engine
+        const revealElements = document.querySelectorAll('.reveal-element');
+        const revealCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        };
+        const revealObserver = new IntersectionObserver(revealCallback, {
+            root: null, threshold: 0.02
+        });
+        revealElements.forEach(element => revealObserver.observe(element));
+
+        // 3. Dynamic Navbar Shrink Effect Hooks & Background Logo Fader Engine
+        const mainNavbar = document.getElementById('mainNavbar');
+        const scrollingWatermark = document.getElementById('scrollingWatermark');
+        const galleryHeader = document.getElementById('gallery-header');
+        const mainFooter = document.getElementById('mainFooter');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            // Navbar shrink trigger
+            if (scrollTop > 50) {
+                mainNavbar.classList.add('scrolled');
+            } else {
+                mainNavbar.classList.remove('scrolled');
+            }
+
+            // Watermark fade coordinator
+            const heroHeight = galleryHeader ? galleryHeader.offsetHeight : 500;
+            const documentHeight = document.documentElement.scrollHeight;
+            const windowHeight = window.innerHeight;
+            const footerHeight = mainFooter ? mainFooter.offsetHeight : 400;
+
+            const scrolledPastHero = scrollTop > (heroHeight - 100);
+            const reachedNearFooter = scrollTop + windowHeight > (documentHeight - footerHeight + 100);
+
+            if (scrolledPastHero && !reachedNearFooter) {
+                scrollingWatermark.classList.add('visible');
+            } else {
+                scrollingWatermark.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+</html>

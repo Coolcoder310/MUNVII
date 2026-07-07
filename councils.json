@@ -1,0 +1,110 @@
+[
+  {
+    "id": "unesco",
+    "tier": "junior",
+    "badge": "Novice",
+    "title": "UNESCO",
+    "image": "assets/councils/unesco.png",
+    "agenda": "World Heritage Sites in Danger due to Earthquakes and Natural Disasters & Use of Technology in Education",
+    "shortDescription": "Introduces entry-tier delegates to basic consensus documentation, modular resolution designs, and structural public speech blueprints."
+  },
+  {
+    "id": "unep",
+    "tier": "junior",
+    "badge": "Test",
+    "title": "UNEP",
+    "image": "assets/councils/unep.png",
+    "agenda": "Air Quality and Public Health & Sustainable Ocean Management",
+    "shortDescription": "Fostering legal advocacy and diplomatic frameworks focused on mitigating child displacement vectors inside active conflict zones."
+  },
+  {
+    "id": "who",
+    "tier": "junior",
+    "badge": "Intermediate",
+    "title": "WHO",
+    "image": "assets/councils/who.png",
+    "agenda": "Evaluating Transnational Health Governance & Global Data Structuring",
+    "shortDescription": "A procedural assembly looking at cross-border data structures during transnational health management challenges."
+  },
+  {
+    "id": "uefa",
+    "tier": "junior",
+    "badge": "Intermediate",
+    "title": "UEFA",
+    "image": "assets/councils/uefa.png",
+    "agenda": "Safeguarding Sovereign Cultural Landmarks against Radical Climate Events",
+    "shortDescription": "Debating geopolitical governance architectures guarding historical cultural landmarks against rising climate threats."
+  },
+  {
+    "id": "unsc",
+    "tier": "senior",
+    "badge": "Advanced",
+    "title": "UN Security Council",
+    "image": "assets/councils/unsc.png",
+    "agenda": "The Impact of Climate Change on International Peace and Security & The role of AI in Strengthening Peacekeeping Operations",
+    "shortDescription": "Evaluating defensive sovereign structures against complex state-sponsored industrial cyber warfare structures globally."
+  },
+  {
+    "id": "eu",
+    "tier": "senior",
+    "badge": "Advanced",
+    "title": "European Union",
+    "image": "assets/councils/eu.png",
+    "agenda": "Regulatory Implementation Maps Guarding AI Weaponized Payload Tracking Architectures",
+    "shortDescription": "Establishing binding multi-lateral regulatory frameworks on weaponized drone algorithms and automated payloads."
+  },
+  {
+    "id": "unoosa",
+    "tier": "senior",
+    "badge": "Advanced",
+    "title": "UNOOSA",
+    "image": "assets/councils/unoosa.png",
+    "agenda": "Sovereign Financial Risk Mitigation for Emerging Markets Under Multi-Theater Crises",
+    "shortDescription": "Structuring collaborative stabilization protocols for emerging market national debt collapses and system failures."
+  },
+  {
+    "id": "undp",
+    "tier": "senior",
+    "badge": "Advanced",
+    "title": "UNDP",
+    "image": "assets/councils/undp.png",
+    "agenda": "Extra-Atmospheric Resource Extraction Jurisdiction Maps under Modern Maritime Codes",
+    "shortDescription": "Addressing jurisdictional governance conflicts concerning commercial resource extraction models across extra-atmospheric bodies."
+  },
+  {
+    "id": "imf",
+    "tier": "senior",
+    "badge": "Expert",
+    "title": "IMF",
+    "image": "assets/councils/imf.png",
+    "agenda": "Dynamic Real-Time Defensive Counter-Deployments and Border Dissolution Matrix Simulation",
+    "shortDescription": "Rapid-fire simulation environment responding to synchronized multi-theater geopolitical conflicts with high-stakes urgency."
+  },
+  {
+    "id": "lok_sabha",
+    "tier": "senior",
+    "badge": "Expert",
+    "title": "Lok Sabha",
+    "image": "assets/councils/lok_sabha.png",
+    "agenda": "Adjudicating Sovereign Continental Economic Overlaps and Contested Deep Sea Shelves",
+    "shortDescription": "Advanced adversarial arbitration litigating long-standing continental maritime economic boundary disputes under international law."
+  },
+  {
+    "id": "fcc",
+    "tier": "senior",
+    "badge": "Advanced",
+    "title": "FCC",
+    "image": "assets/councils/fcc.png",
+    "agenda": "Balancing Deep-Sea Minerals Harvesting Targets With Marine Biosphere Sanctuary Protections",
+    "shortDescription": "Formulating resource distribution frameworks to balance deep-sea mining quotas alongside active oceanic biosphere preserves."
+  },
+  {
+    "id": "fia",
+    "tier": "senior",
+    "badge": "Expert",
+    "title": "Fédération Internationale de l'Automobile",
+    "image": "assets/councils/fia.png",
+    "agenda": "Synchronized Article 5 Operations Vectors and Advanced Nuclear Fleet Integration Acts",
+    "shortDescription": "Managing high-stakes defensive deployment architectures and nuclear non-proliferation treaties amidst shifting borders."
+  }
+]

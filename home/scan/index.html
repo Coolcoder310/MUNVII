@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Attendance - NewMUN VIII</title>
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family:apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #F4F7FA;
+            color: #06090f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 1rem;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        .scanner-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 24px;
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 20px 40px rgba(6, 9, 15, 0.05);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanner-header h2 {
+            color: #1c007c;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Dynamic Status Badge */
+        .session-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .session-badge.locked {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .session-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        #camera-preview {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #0886fd;
+            background: #000000;
+        }
+
+        #camera-preview video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-action {
+            background-color: transparent;
+            color: #0886fd;
+            border: 2px solid #0886fd;
+            padding: 0.75rem 1.75rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: 20px 0 0 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn-action:hover {
+            background-color: #0886fd;
+            color: #ffffff;
+        }
+
+        /* Feedback UI Overlay */
+        .status-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.12s ease;
+            padding: 1.5rem;
+        }
+
+        .status-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .status-icon {
+            width: 60px; height: 60px; font-size: 2rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+        }
+
+        .status-overlay.success .status-icon { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .status-overlay.success p { color: #1c007c; }
+
+        .status-overlay.error .status-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .status-overlay.error p { color: #ef4444; }
+
+        .status-overlay.duplicate .status-icon { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .status-overlay.duplicate p { color: #f59e0b; }
+
+        .status-overlay p {
+            font-weight: 800;
+            font-size: 1.25rem;
+            line-height: 1.4;
+        }
+        
+        #hiddenLinkProcessor {
+            display: none;
+            width: 0; height: 0; border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanner-card">
+        <div class="status-overlay" id="statusOverlay">
+            <div class="status-icon" id="statusIcon"><i class="bi bi-check-lg"></i></div>
+            <p id="statusMessage">Logged Successfully</p>
+        </div>
+
+        <div class="scanner-header">
+            <h2>ID Entry Gate</h2>
+            <div class="session-badge locked" id="sessionStatus">
+                <i class="bi bi-lock-fill"></i> Please Scan Security/Runner's ID to Validate
+            </div>
+        </div>
+
+        <div id="camera-preview"></div>
+
+        <div class="btn-container">
+            <button class="btn-action" id="startCamBtn">
+                <i class="bi bi-camera-video-fill"></i> Start Camera
+            </button>
+
+            <button class="btn-action" id="nextQrBtn" style="display: none;">
+                <i class="bi bi-arrow-left-circle-fill"></i> Reset Session
+            </button>
+        </div>
+    </div>
+
+    <iframe id="hiddenLinkProcessor" src=""></iframe>
+
+    <script>
+        const statusOverlay = document.getElementById('statusOverlay');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusMessage = document.getElementById('statusMessage');
+        const sessionStatus = document.getElementById('sessionStatus');
+        const hiddenLinkProcessor = document.getElementById('hiddenLinkProcessor');
+        const startCamBtn = document.getElementById('startCamBtn');
+        const nextQrBtn = document.getElementById('nextQrBtn');
+        
+        let resetTimeout = null;
+        const html5QrCode = new Html5Qrcode("camera-preview");
+        const recentScansLog = {};
+        
+        // Workflow Engine State Variables
+        let isGatekeeperAuthorized = false;
+
+        startCamBtn.addEventListener('click', () => {
+            startCamBtn.style.display = 'none';
+            nextQrBtn.style.display = 'inline-flex';
+            startScanning();
+        });
+
+        nextQrBtn.addEventListener('click', () => {
+            clearTimeout(resetTimeout);
+            // Acts as a manual override to clear everything and force gatekeeper validation again
+            isGatekeeperAuthorized = false;
+            updateSessionUI();
+            resetScannerInterface();
+        });
+
+        function updateSessionUI() {
+            if (isGatekeeperAuthorized) {
+                sessionStatus.className = "session-badge active";
+                sessionStatus.innerHTML = '<i class="bi bi-unlock-fill"></i> Scan Delegate\'s IDs';
+            } else {
+                sessionStatus.className = "session-badge locked";
+                sessionStatus.innerHTML = '<i class="bi bi-lock-fill"></i> Please Scan Security/Runner\'s ID to Validate';
+            }
+        }
+
+        function startScanning() {
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 30,
+                    qrbox: undefined,
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                },
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                console.error(err);
+                startCamBtn.style.display = 'inline-flex';
+                nextQrBtn.style.display = 'none';
+            });
+        }
+
+        function onScanSuccess(decodedText) {
+            html5QrCode.stop().then(() => {
+                const scannedUrl = decodedText.trim();
+                const currentTime = Date.now();
+                
+                statusOverlay.classList.remove('success', 'error', 'duplicate');
+
+                // Check basic URL criteria bounds
+                const isGoogleDocs = scannedUrl.startsWith("https://docs.google.com") || scannedUrl.startsWith("docs.google.com");
+                const endsWithRS = scannedUrl.endsWith("RS");
+
+                if (!isGoogleDocs) {
+                    statusOverlay.classList.add('error');
+                    statusIcon.innerHTML = '<i class="bi bi-x-lg"></i>';
+                    statusMessage.innerText = "Invalid QR Code";
+                } 
+                // PHASE 1: Gatekeeper Authorization Check Routine
+                else if (!isGatekeeperAuthorized) {
+                    if (endsWithRS) {
+                        isGatekeeperAuthorized = true;
+                        updateSessionUI();
+                        
+                        hiddenLinkProcessor.src = scannedUrl; // Open the form for the gatekeeper setup
+                        statusOverlay.classList.add('success');
+                        statusIcon.innerHTML = '<i class="bi bi-shield-check"></i>';
+                        statusMessage.innerText = "Gatekeeper Authorized!\nReady for Attendee Cards.";
+                    } else {
+                        statusOverlay.classList.add('error');
+                        statusIcon.innerHTML = '<i class="bi bi-shield-lock-fill"></i>';
+                        statusMessage.innerText = "Access Denied\nScan Gatekeeper ID First";
+                    }
+                } 
+                // PHASE 2: Attendee Scanning System Routine
+                else {
+                    if (endsWithRS) {
+                        // Deny opening another Gatekeeper card during an active session
+                        statusOverlay.classList.add('error');
+                        statusIcon.innerHTML = '<i class="bi bi-exclamation-octagon-fill"></i>';
+                        statusMessage.innerText = "Gatekeeper Already Active";
+                    } 
+                    else if (recentScansLog[scannedUrl] && (currentTime - recentScansLog[scannedUrl] < 600000)) {
+                        statusOverlay.classList.add('duplicate');
+                        statusIcon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
+                        statusMessage.innerText = "ID Already Scanned, NextID\n(Scanned within 10m)";
+                    } 
+                    else {
+                        recentScansLog[scannedUrl] = currentTime;
+                        hiddenLinkProcessor.src = scannedUrl;
+                        statusOverlay.classList.add('success');
+                        statusIcon.innerHTML = '<i class="bi bi-check-lg"></i>';
+                        statusMessage.innerText = "ID Logged Successfully";
+                    }
+                }
+
+                statusOverlay.classList.add('active');
+
+                resetTimeout = setTimeout(() => {
+                    resetScannerInterface();
+                }, 1200);
+
+            }).catch(err => console.error(err));
+        }
+
+        function resetScannerInterface() {
+            hiddenLinkProcessor.src = "";
+            statusOverlay.classList.remove('active');
+            if (!html5QrCode.isScanning) {
+                startScanning();
+            }
+        }
+
+        function onScanFailure(error) {}
+    </script>
+</body>
+</html>

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - NewMUN VIII</title>
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+    <style>
+        /* Global Reset & Core Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family:apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        }
+
+        :root {
+            --white: #FFFFFF;
+            --off-white: #F4F7FA;         
+            --palette-sky: #0886fd;       
+            --palette-indigo: #1c007c;    
+            --palette-royal: #0108b4;     
+            --palette-midnight: #06090f;  
+            
+            --text-main: var(--palette-midnight);
+            --text-muted: #4A5568;
+            --border-clean: rgba(1, 8, 180, 0.08);
+            
+            /* Inverted Box Highlight Palette */
+            --highlight-bg: var(--palette-indigo);
+            --highlight-text: var(--white);
+        }
+
+        /* 10% RESISTIVE NATIVE SMOOTH SNAPPING ENGINE */
+        /* --- GLOBAL SCROLL BEHAVIOR FOR ALL DEVICES --- */
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px; /* Prevents sticky navbar from covering section titles */
+        }
+
+        body {
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-color: var(--white);
+            background-image: radial-gradient(rgba(1, 8, 180, 0.04) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            position: relative;
+        }
+
+        /* --- WATERMARK / BACKGROUND LOGO --- */
+        #scrollingWatermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw; 
+            max-width: 600px;
+            height: 60vw;
+            max-height: 600px;
+            background-image: url('assets/logo.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0; /* Hidden initially inside the Hero section */
+            z-index: -1; 
+            pointer-events: none; 
+            transition: opacity 0.5s ease-in-out; /* Smooth fade visibility */
+        }
+
+        /* Visible modifier class managed via scroll script */
+        #scrollingWatermark.visible {
+            opacity: 0.15; /* 15% visibility for a clean look behind text/cards */
+        }
+
+        /* --- DESKTOPONLY SCROLL SNAPPING ENGINE (Screes wider than 1200px) --- */
+        @media (min-width: 1201px) {
+            html {
+                scroll-snap-type: y mandatory;
+                scroll-padding-top: 20px; /* Tighter padding for perfect desktop snap alignment */
+                height: 100%;
+            }
+            
+            body {
+                height: 100%;
+            }
+            
+            .section {
+                scroll-snap-align: start;
+            }
+            
+            footer {
+                scroll-snap-align: end;
+            }
+        }
+
+        /* --- GPU-ACCELERATED KEYFRAMES --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- SCROLL REVEAL UTILITY CLASSES --- */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, opacity;
+        }
+
+        .reveal-element.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- EXACT FLOATING NAVBAR STYLES --- */
+        nav {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1300px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.85rem 2.5rem;
+            border-radius: 100px;
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 30px rgba(6, 9, 15, 0.02), 
+                        0 1px 0px rgba(255, 255, 255, 0.6) inset;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        nav.scrolled {
+            top: 12px;
+            width: 95%;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 0.65rem 2rem;
+            box-shadow: 0 10px 40px rgba(6, 9, 15, 0.06);
+        }
+
+        nav .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--palette-midnight);
+            text-decoration: none;
+        }
+
+        nav .logo img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            background: transparent;
+        }
+
+        nav .logo span {
+            color: var(--palette-royal);
+        }
+
+        .nav-menu-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin: 0 0.3rem; 
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+            padding: 8px 16px; 
+            border-radius: 50px;
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            display: inline-block;
+        }
+
+        nav ul li a:hover {
+            color: var(--palette-midnight);
+            border-color: rgba(0, 0, 0, 0.12);
+            background-color: rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+        }
+
+        .nav-utilities {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(8, 134, 253, 0.06);
+            border: 1px solid rgba(8, 134, 253, 0.15);
+            padding: 0.45rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: var(--palette-sky);
+        }
+
+        .status-indicator-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--palette-sky);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-indicator-dot::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--palette-sky);
+            border-radius: 50%;
+            animation: beaconPulse 2s infinite ease-out;
+        }
+
+        @keyframes beaconPulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3.5); opacity: 0; }
+        }
+
+        /* --- FIXED COMPACT NAVBAR BUTTON --- */
+        .nav-utilities .btn-nav-compact {
+            padding: 0.55rem 1.4rem;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(1, 8, 180, 0.12);
+            background-color: var(--palette-royal);
+            color: var(--white);
+            border: 2px solid var(--palette-royal);
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-utilities .btn-nav-compact:hover {
+            background-color: transparent;
+            color: var(--palette-royal);
+            border-color: var(--palette-royal);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(1, 8, 180, 0.12);
+        }
+
+        #menu-toggle { display: none; }
+        .hamburger-label { display: none; cursor: pointer; flex-direction: column; justify-content: space-between; width: 22px; height: 16px; z-index: 1020; }
+        .hamburger-label span { display: block; height: 2px; width: 100%; background-color: var(--palette-midnight); border-radius: 2px; transition: all 0.3s ease; }
+
+        /* --- SMART FLOATING DIRECTIONAL CONTROL HUB --- */
+        .floating-scroller-hub {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 2000;
+            opacity: 0; 
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .floating-scroller-hub.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .nav-circle-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--white);
+            border: 1px solid var(--border-clean);
+            color: var(--palette-indigo);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(6, 9, 15, 0.08);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-circle-btn:hover {
+            background-color: var(--palette-indigo);
+            color: var(--white);
+            border-color: var(--palette-indigo);
+            transform: translateY(-2px);
+        }
+
+        .nav-circle-btn.hidden-node {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.7);
+            height: 0;
+            margin: 0;
+        }
+
+        .nav-circle-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* --- HORIZONTALLY STRETCHED HEADER BANNER --- */
+        .resources-hero {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            display: flex;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            scroll-snap-align: start;
+            background: linear-gradient(
+                to bottom, 
+                rgba(8, 134, 253, 0.09) 0%,   
+                rgba(244, 247, 250, 0.5) 75%, 
+                transparent 100%               
+            ) !important;
+            min-height: 55vh; 
+        }
+
+        .title-rectangle-plate {
+            width: 100%;
+            background-color: transparent !important;
+            background-image: linear-gradient(rgba(1, 8, 180, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(1, 8, 180, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--palette-midnight);
+            padding: 210px 10% 5rem 10% !important; 
+            text-align: center;
+            border-bottom: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 30px rgba(6, 9, 15, 0.01);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+            position: relative;
+        }
+
+        .title-rectangle-plate::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--palette-sky), var(--palette-royal), var(--palette-sky));
+        }
+
+        .title-rectangle-plate h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--palette-indigo);
+            margin-bottom: 0.8rem;
+        }
+
+        .title-rectangle-plate p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            max-width: 850px;
+            margin: 0 auto;
+            letter-spacing: 0.3px;
+        }
+
+        /* --- RESOURCES CORE GRID ARCHITECTURE --- */
+        .section {
+            padding: 6rem 10%;
+            max-width: 1440px;
+            margin: 0 auto;
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            scroll-snap-align: start;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.3rem;
+            font-weight: 800;
+            margin-bottom: 4.5rem;
+            color: var(--palette-midnight);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--palette-sky);
+            border-radius: 2px;
+        }
+
+        .section-subtitle-pill {
+            display: block;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--palette-sky);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.8rem;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .resource-card {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 2.5rem 2rem;
+            border-radius: 16px; 
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 20px rgba(6, 9, 15, 0.01);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--palette-sky);
+            background-color: var(--white);
+            box-shadow: 0 20px 40px rgba(1, 8, 180, 0.07);
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: rgba(1, 8, 180, 0.04);
+            color: var(--palette-royal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(1, 8, 180, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover .icon-box {
+            background: var(--palette-royal);
+            color: var(--white);
+        }
+
+        .icon-box svg {
+            width: 28px;
+            height: 28px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .resource-card h3 {
+            margin-bottom: 0.6rem;
+            font-size: 1.3rem;
+            color: var(--palette-indigo);
+            font-weight: 700;
+        }
+
+        .resource-card p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            flex-grow: 1; 
+        }
+
+        .btn-download-action {
+            width: 100%;
+            background-color: transparent;
+            color: var(--palette-sky);
+            border: 2px solid var(--palette-sky);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px; 
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .resource-card:hover .btn-download-action {
+            background-color: var(--palette-sky);
+            color: var(--white);
+            box-shadow: 0 6px 16px rgba(8, 134, 253, 0.15);
+        }
+
+        /* --- INSTITUTIONAL DARK FOOTER --- */
+        footer {
+            background-color: var(--palette-midnight);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: left; 
+            padding: 5rem 10% 3rem 10%;
+            border-top: 4px solid var(--palette-royal);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            scroll-snap-align: end;
+            position: relative;
+            z-index: 5;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(3, 1fr);
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand h2 {
+            color: var(--white);
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand h2 span {
+            color: var(--palette-sky);
+        }
+
+        .footer-brand p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 300px;
+            line-height: 1.6;
+        }
+
+        .footer-links-col h3 {
+            color: var(--white);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-links-col ul {
+            list-style: none;
+        }
+
+        .footer-links-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links-col ul li a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links-col ul li a:hover {
+            color: var(--palette-sky);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        footer strong {
+            color: var(--white);
+        }
+
+        /* --- RESPONSIVENESS CONTROLS & OVERRIDES --- */
+        @media (max-width: 1200px) {
+            .resources-grid { grid-template-columns: repeat(2, 1fr); }
+            .section { padding: 6rem 8%; min-height: auto !important; }
+            .floating-scroller-hub { display: none !important; }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
+            .title-rectangle-plate h1 { font-size: 2.8rem; }
+        }
+
+        @media (max-width: 768px) {
+            .resources-grid { grid-template-columns: 1fr !important; }
+            .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+            .title-rectangle-plate { padding: 180px 6% 3.5rem 6% !important; }
+            .title-rectangle-plate h1 { font-size: 2.2rem; }
+            
+            nav { top: 0 !important; width: 100% !important; border-radius: 0; border-inline: none; padding: 1rem 6%; }
+            .hamburger-label { display: flex; }
+            .nav-menu-wrapper {
+                position: fixed;
+                top: -100vh; left: 0; width: 100%; height: 100vh;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                gap: 30px;
+                transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1005;
+            }
+            nav ul { flex-direction: column; gap: 20px; }
+            #menu-toggle:checked ~ .nav-menu-wrapper { top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scrollingWatermark"></div>
+
+    <div class="floating-scroller-hub" id="scrollerHub">
+        <div class="nav-circle-btn" id="btnUp" title="Scroll Up">
+            <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+        </div>
+        <div class="nav-circle-btn" id="btnDown" title="Scroll Down">
+            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+    </div>
+
+    <nav id="mainNavbar">
+        <a href="index.html#home" class="logo">
+            <img src="assets/logo.png" alt="New MUN Logo">
+            NewMUN VIII
+        </a>
+        
+        <input type="checkbox" id="menu-toggle">
+        <label for="menu-toggle" class="hamburger-label">
+            <span></span><span></span><span></span>
+        </label>
+
+        <div class="nav-menu-wrapper">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="councils.html">Councils</a></li>
+                <li><a href="oc.html">The OC</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+            </ul>
+            
+            <div class="nav-utilities">
+                <div class="status-pill">
+                    <span class="status-indicator-dot"></span>
+                    Seats Open 2026
+                </div>
+                <a href="index.html#committees" class="btn-nav-compact">Apply</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="resources-hero" id="res-header" >
+        <div class="title-rectangle-plate" style="background-image: url('assets/bg.gif');background-size: cover; background-position: center; background-repeat: no-repeat; width: 100%; height: 500px;">
+            <h1 style="color: white;">Resources</h1>
+            <p style="color: white;">Access the formal operational assets, compliance files, digital branding packets, and briefing guides for New MUN 2026.</p>
+        </div>
+    </header>
+
+    <section class="section reveal-element" id="resources-hub">
+        <span class="section-subtitle-pill">Delegate Briefing Hub</span>
+        <h2 class="section-title">Essential Files</h2>
+        
+        <div class="resources-grid">
+            
+            <div class="resource-card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h3>Committee Allocations</h3>
+                <p>Review the comprehensive global roster mapping registered school delegations to assigned nations across all twelve council matrices.</p>
+                <a href="path/to/allocations.pdf" download class="btn-download-action">
+                    Get Allocations (PDF) &rarr;
+                </a>
+            </div>
+
+            <div class="resource-card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <h3>Delegate Handbook</h3>
+                <p>The definitive preparation manual containing parliamentary protocols, operational resolution models, and position essay guide blueprints.</p>
+                <a href="path/to/delegate-handbook.pdf" download class="btn-download-action">
+                    Download Handbook &rarr;
+                </a>
+            </div>
+
+            <div class="resource-card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <h3>Chair Handbook</h3>
+                <p>Procedural directives and evaluation parameters engineered exclusively for directors moderating formal structured caucus assemblies.</p>
+                <a href="path/to/chair-handbook.pdf" download class="btn-download-action">
+                    Get Briefing Manual &rarr;
+                </a>
+            </div>
+
+            <div class="resource-card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+                <h3>Conference Itinerary</h3>
+                <p>A comprehensive master time matrix details opening protocols, formal sessions steps, crisis modules, and social gala windows.</p>
+                <a href="path/to/itinerary.pdf" download class="btn-download-action">
+                    View Schedule (PDF) &rarr;
+                </a>
+            </div>
+
+            <div class="resource-card">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <h3>Logo & Media Packet</h3>
+                <p>High-resolution vector assets and formal institutional typography kits for custom school delegation research documents and presentations.</p>
+                <a href="path/to/logo-packet.zip" download class="btn-download-action">
+                    Download ZIP Bundle &rarr;
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <footer id="mainFooter">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <img src="assets/logo.png" alt="" width="64">
+                <h2>NewMUN VIII</h2>
+                <p>Empowering the next generation of leaders through debate, diplomacy, and collaboration.</p>
+            </div>
+            <div class="footer-links-col">
+                <h3>Main Pages</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="councils.html">Councils</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="#resources">Senior Councils Allocation</a></li>
+                    <li><a href="#resources">Junior Councils Allocation</a></li>
+                    <li><a href="#resources">Itinerary</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h3>The Organisers</h3>
+                <ul>
+                    <li><a href="index.html#principal">Principal's Message</a></li>
+                    <li><a href="oc.html">The OC</a></li>
+                    <li><a href="https://instagram.com/">Instagram Page</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 NewMUN VIII. All rights reserved.</p>
+            <p>Designed by Atharva</p>
+        </div>
+    </footer>
+    <script>
+        // Dynamic Scroll Reveal Engine
+        const revealElements = document.querySelectorAll('.reveal-element');
+        const revealCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        };
+        const revealObserver = new IntersectionObserver(revealCallback, {
+            root: null, threshold: 0.02
+        });
+        revealElements.forEach(element => revealObserver.observe(element));
+
+        // Dynamic Navbar Shrink Effect Hooks & Background Logo Fader Engine
+        const mainNavbar = document.getElementById('mainNavbar');
+        const scrollingWatermark = document.getElementById('scrollingWatermark');
+        const resHeader = document.getElementById('res-header');
+        const mainFooter = document.getElementById('mainFooter');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            // Navbar adjustments
+            if (scrollTop > 50) {
+                mainNavbar.classList.add('scrolled');
+            } else {
+                mainNavbar.classList.remove('scrolled');
+            }
+
+            // Watermark fade-out visibility logic
+            const heroHeight = resHeader ? resHeader.offsetHeight : 500;
+            const documentHeight = document.documentElement.scrollHeight;
+            const windowHeight = window.innerHeight;
+            const footerHeight = mainFooter ? mainFooter.offsetHeight : 400;
+
+            const scrolledPastHero = scrollTop > (heroHeight - 100);
+            const reachedNearFooter = scrollTop + windowHeight > (documentHeight - footerHeight + 100);
+
+            if (scrolledPastHero && !reachedNearFooter) {
+                scrollingWatermark.classList.add('visible');
+            } else {
+                scrollingWatermark.classList.remove('visible');
+            }
+        });
+
+        // Directional Scroller Navigation Matrix Hub
+        const sections = [
+            document.getElementById('res-header'),
+            document.getElementById('resources-hub'),
+            document.getElementById('mainFooter')
+        ];
+
+        const scrollerHub = document.getElementById('scrollerHub');
+        const btnUp = document.getElementById('btnUp');
+        const btnDown = document.getElementById('btnDown');
+
+        function updateScrollerHub() {
+            const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight;
+            
+            let activeIdx = 0;
+            let minDiff = Math.abs(scrollPos - sections[0].offsetTop);
+
+            sections.forEach((sec, idx) => {
+                if(!sec) return;
+                const diff = Math.abs(scrollPos - sec.offsetTop);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    activeIdx = idx;
+                }
+            });
+
+            if (activeIdx === 0 || scrollPos < windowHeight * 0.3) {
+                scrollerHub.classList.remove('visible');
+            } else {
+                scrollerHub.classList.add('visible');
+            }
+
+            if (activeIdx === 0) {
+                btnUp.classList.add('hidden-node');
+            } else {
+                btnUp.classList.remove('hidden-node');
+            }
+
+            if (activeIdx === sections.length - 1 || (scrollPos + windowHeight >= docHeight - 60)) {
+                btnDown.classList.add('hidden-node');
+            } else {
+                btnDown.classList.remove('hidden-node');
+            }
+        }
+
+        function navigateIncrementally(direction) {
+            const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+            let currentIdx = 0;
+            let minDiff = Math.abs(scrollPos - sections[0].offsetTop);
+
+            sections.forEach((sec, idx) => {
+                if(!sec) return;
+                const diff = Math.abs(scrollPos - sec.offsetTop);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    currentIdx = idx;
+                }
+            });
+
+            let targetIdx = currentIdx + direction;
+            if (targetIdx >= 0 && targetIdx < sections.length) {
+                sections[targetIdx].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        btnUp.addEventListener('click', () => navigateIncrementally(-1));
+        btnDown.addEventListener('click', () => navigateIncrementally(1));
+
+        window.addEventListener('scroll', updateScrollerHub);
+        window.addEventListener('resize', updateScrollerHub);
+        window.addEventListener('load', updateScrollerHub);
+    </script>
+</body>
+</html>

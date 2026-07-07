@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The OC - NewMUN VIII</title>
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+    <style>
+        /* Global Reset & Core Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family:apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        }
+
+        :root {
+            --white: #FFFFFF;
+            --off-white: #F4F7FA;
+            --palette-sky: #0886fd;
+            --palette-indigo: #1c007c;
+            --palette-royal: #0108b4;
+            --palette-midnight: #06090f;
+
+            --text-main: var(--palette-midnight);
+            --text-muted: #4A5568;
+            --border-clean: rgba(1, 8, 180, 0.08);
+
+            /* Inverted Box Highlight Palette */
+            --highlight-bg: var(--palette-indigo);
+            --highlight-text: var(--white);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-color: var(--white);
+            background-image: radial-gradient(rgba(1, 8, 180, 0.04) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            position: relative;
+        }
+
+        /* --- WATERMARK / BACKGROUND LOGO --- */
+        #scrollingWatermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw;
+            max-width: 600px;
+            height: 60vw;
+            max-height: 600px;
+            background-image: url('assets/logo.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            /* Hidden initially inside the Hero section */
+            z-index: -1;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+            /* Smooth fade visibility */
+        }
+
+        /* Visible modifier class managed via JS script */
+        #scrollingWatermark.visible {
+            opacity: 0.15;
+            /* Adjusted to 15% visibility for a cleaner look behind text cards */
+        }
+
+        body.modal-open {
+            overflow: hidden !important;
+            height: 100vh !important;
+        }
+
+        /* --- GPU-ACCELERATED KEYFRAMES --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- FLOATING NAVBAR ENGINE --- */
+        nav {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1300px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.85rem 2.5rem;
+            border-radius: 100px;
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 30px rgba(6, 9, 15, 0.02), 0 1px 0px rgba(255, 255, 255, 0.6) inset;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            min-height: 62px;
+        }
+
+        nav.scrolled {
+            top: 12px;
+            width: 95%;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 0.65rem 2rem;
+            box-shadow: 0 10px 40px rgba(6, 9, 15, 0.06);
+        }
+
+        nav .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--palette-midnight);
+            text-decoration: none;
+        }
+
+        nav .logo img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            background: transparent;
+        }
+
+        nav .logo span {
+            color: var(--palette-royal);
+        }
+
+        .nav-menu-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin: 0 0.3rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            display: inline-block;
+        }
+
+        nav ul li a:hover {
+            color: var(--palette-midnight);
+            border-color: rgba(0, 0, 0, 0.12);
+            background-color: rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+        }
+
+        .nav-utilities {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(8, 134, 253, 0.06);
+            border: 1px solid rgba(8, 134, 253, 0.15);
+            padding: 0.45rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: var(--palette-sky);
+        }
+
+        .status-indicator-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--palette-sky);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-indicator-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--palette-sky);
+            border-radius: 50%;
+            animation: beaconPulse 2s infinite ease-out;
+        }
+
+        @keyframes beaconPulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(3.5);
+                opacity: 0;
+            }
+        }
+
+        .nav-utilities .btn-nav-compact {
+            padding: 0.55rem 1.4rem;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(1, 8, 180, 0.12);
+            background-color: var(--palette-royal);
+            color: var(--white);
+            border: 2px solid var(--palette-royal);
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-utilities .btn-nav-compact:hover {
+            background-color: transparent;
+            color: var(--palette-royal);
+            border-color: var(--palette-royal);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(1, 8, 180, 0.12);
+        }
+
+        #menu-toggle {
+            display: none;
+        }
+
+        .hamburger-label {
+            display: none;
+            cursor: pointer;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 22px;
+            height: 16px;
+            z-index: 1020;
+        }
+
+        .hamburger-label span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: var(--palette-midnight);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* --- HERO HEADER BANNER --- */
+        .oc-hero {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            display: flex;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            background: linear-gradient(to bottom,
+                    rgba(8, 134, 253, 0.12) 0%,
+                    rgba(244, 247, 250, 0.6) 70%,
+                    transparent 100%) !important;
+            min-height: 55vh;
+        }
+
+        .title-rectangle-plate {
+            width: 100%;
+            background-color: transparent !important;
+            background-image: linear-gradient(rgba(1, 8, 180, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(1, 8, 180, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--palette-midnight);
+            padding: 210px 10% 5rem 10% !important;
+            text-align: center;
+            border-bottom: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 30px rgba(6, 9, 15, 0.01);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+            position: relative;
+        }
+
+        .title-rectangle-plate::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--palette-sky), var(--palette-royal), var(--palette-sky));
+        }
+
+        .title-rectangle-plate h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--palette-indigo);
+            margin-bottom: 0.8rem;
+        }
+
+        .title-rectangle-plate p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            max-width: 850px;
+            margin: 0 auto;
+            letter-spacing: 0.3px;
+        }
+
+        /* --- SELECTION TOGGLE BAR HUB --- */
+        .selection-filter-hub {
+            display: flex;
+            justify-content: center;
+            margin-top: 4rem;
+            width: 100%;
+        }
+
+        .filter-pill-container {
+            display: inline-flex;
+            background: rgba(244, 247, 250, 0.9);
+            padding: 6px;
+            border-radius: 50px;
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 4px 20px rgba(6, 9, 15, 0.02);
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 0.75rem 2.5rem;
+            border-radius: 40px;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .filter-btn.active {
+            background-color: var(--palette-royal);
+            color: var(--white);
+            box-shadow: 0 4px 14px rgba(1, 8, 180, 0.18);
+        }
+
+        /* --- SECTIONS MATRIX --- */
+        .section-wrapper-toggleable {
+            display: none;
+        }
+
+        .section-wrapper-toggleable.visible {
+            display: block;
+        }
+
+        .section {
+            padding: 3rem 0 6rem 0;
+            width: 90%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* --- MODERNISED GRID LAYOUT DESIGN SYSTEM (NEWMUNBH) --- */
+        .oc-grid,
+        .faculty-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            width: 100%;
+        }
+
+        /* --- IMMERSIVE COMPACT CARDS PROFILE ELEMENT --- */
+        .card {
+            background-color: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(1, 8, 180, 0.08);
+            box-shadow: 0 10px 30px rgba(6, 9, 15, 0.03);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: left;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: var(--palette-sky);
+            box-shadow: 0 20px 40px rgba(1, 8, 180, 0.08);
+        }
+
+        .card-image-wrapper {
+            width: 100%;
+            height: 280px;
+            background: var(--off-white);
+            margin-bottom: 0;
+            border-radius: 0;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(1, 8, 180, 0.05);
+            position: relative;
+        }
+
+        .card-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card:hover .card-image-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        /* TEXT AND BUTTON TYPOGRAPHY LAYOUT */
+        .member-role {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--palette-sky);
+            letter-spacing: 1px;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        .faculty-card-text {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* UPDATED PREMIUM PILL BUTTON DESIGN */
+        .btn-card-outline {
+            width: 100%;
+            background-color: transparent;
+            color: var(--palette-royal);
+            border: 2px solid var(--palette-royal);
+            padding: 0.65rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 1.2rem;
+        }
+
+        .btn-card-outline:hover {
+            background-color: var(--palette-royal);
+            color: var(--white);
+            border-color: var(--palette-royal);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(1, 8, 180, 0.16);
+        }
+
+        /* --- FULL SCREEN OVERLAY POP-UP SYSTEM --- */
+        .fullscreen-modal-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(6, 9, 15, 0.3);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 2rem;
+        }
+
+        .fullscreen-modal-wrapper.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-container-plate {
+            background: var(--white);
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            border-radius: 24px;
+            border: 1px solid rgba(1, 8, 180, 0.1);
+            box-shadow: 0 30px 70px rgba(6, 9, 15, 0.18);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(40px) scale(0.96);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fullscreen-modal-wrapper.active .modal-container-plate {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-dismiss-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            background: var(--off-white);
+            border: 1px solid rgba(1, 8, 180, 0.05);
+            color: var(--palette-midnight);
+            font-size: 1.8rem;
+            font-weight: 300;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            line-height: 1;
+            padding-bottom: 4px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-dismiss-btn:hover {
+            background: var(--palette-indigo);
+            color: var(--white);
+            transform: rotate(90deg);
+        }
+
+        .modal-scroller-body {
+            overflow-y: auto;
+            padding: 3rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(1, 8, 180, 0.1) transparent;
+        }
+
+        .modal-header-block {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .modal-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            padding: 5px 14px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            background: rgba(8, 134, 253, 0.06);
+            color: var(--palette-sky);
+            border: 1px solid rgba(8, 134, 253, 0.15);
+        }
+
+        .modal-header-block h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--palette-indigo);
+            line-height: 1.2;
+        }
+
+        .modal-meta-section h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--palette-sky);
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        .modal-meta-section p.modal-desc-text {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        /* --- INSTITUTIONAL FOOTER LAYOUT --- */
+        footer {
+            background-color: var(--palette-midnight);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: left;
+            padding: 5rem 5% 3rem 5%;
+            border-top: 4px solid var(--palette-royal);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .footer-content-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(3, 1fr);
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand h2 {
+            color: var(--white);
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 300px;
+            line-height: 1.6;
+        }
+
+        .footer-links-col h3 {
+            color: var(--white);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-links-col ul {
+            list-style: none;
+        }
+
+        .footer-links-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links-col ul li a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links-col ul li a:hover {
+            color: var(--palette-sky);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* --- RESPONSIVENESS OVERRIDES --- */
+        @media (max-width: 1200px) {
+
+            .oc-grid,
+            .faculty-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+
+            .oc-grid,
+            .faculty-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1.5rem;
+            }
+
+            .section {
+                padding: 4rem 5% 6rem 5%;
+                width: 100%;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 3rem;
+            }
+
+            .title-rectangle-plate h1 {
+                font-size: 2.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                top: 0 !important;
+                width: 100% !important;
+                border-radius: 0;
+                padding: 1rem 6%;
+            }
+
+            .hamburger-label {
+                display: flex;
+            }
+
+            .nav-menu-wrapper {
+                position: fixed;
+                top: -100vh;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                gap: 30px;
+                transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1005;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            #menu-toggle:checked~.nav-menu-wrapper {
+                top: 0;
+            }
+
+            .oc-grid,
+            .faculty-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem;
+            }
+
+            .card-image-wrapper {
+                height: 320px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .title-rectangle-plate {
+                padding: 180px 6% 3.5rem 6% !important;
+            }
+
+            .title-rectangle-plate h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="scrollingWatermark"></div>
+
+    <nav id="mainNavbar">
+        <a href="index.html" class="logo">
+            <img src="assets/logo.png" alt="New MUN Logo">
+            NewMUN VIII
+        </a>
+
+        <input type="checkbox" id="menu-toggle">
+        <label for="menu-toggle" class="hamburger-label">
+            <span></span><span></span><span></span>
+        </label>
+
+        <div class="nav-menu-wrapper">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="councils.html">Councils</a></li>
+                <li><a href="oc.html">The OC</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+            </ul>
+
+            <div class="nav-utilities">
+                <div class="status-pill">
+                    <span class="status-indicator-dot"></span>
+                    Seats Open 2026
+                </div>
+                <a href="#register" class="btn-nav-compact">Apply</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="oc-hero" id="heroHeader">
+        <div class="title-rectangle-plate"
+            style="background-image: url('assets/bg.gif');background-size: cover; background-position: center; background-repeat: no-repeat; width: 100%; height: 500px;">
+            <h1 style="color: white;">Organizing Team</h1>
+            <p style="color: white;">Meet the brilliant architects driving systemic policy thresholds and operational
+                architecture for NewMUN 2026.</p>
+        </div>
+    </header>
+
+    <div class="selection-filter-hub">
+        <div class="filter-pill-container">
+            <button class="filter-btn active" id="show-oc-btn">Organizing Committee</button>
+            <button class="filter-btn" id="show-faculty-btn">Faculty Advisors</button>
+        </div>
+    </div>
+
+    <div class="section-wrapper-toggleable visible" id="oc-wrapper">
+        <section class="section">
+            <div class="oc-grid">
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-management.jpg" alt="Secretariat Team Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Head and UndersecretaMedia</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Aarav Mehta
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Aarav Mehta"
+                            data-role="Secretary-General" data-dept="Secretariat"
+                            data-bio="Aarav channels 5+ years of simulation diplomacy to pilot administrative compliance blueprints.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-academics.jpg" alt="Academic Affairs Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Director of Academics</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Rohan Joshi
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Rohan Joshi"
+                            data-role="Director of Academics" data-dept="Academic Affairs"
+                            data-bio="Rohan manages council rules enforcement, quality check gates, and curriculum design loops.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-logistics.jpg" alt="Logistics Team Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Logistics Chair</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Kabir
+                                Malhotra</h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Kabir Malhotra"
+                            data-role="Logistics Chair" data-dept="Logistics & Ops"
+                            data-bio="Kabir tracks space alignment layouts, scheduling parameters, and resource distribution decks.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-finance.jpg" alt="Finance Visual"></div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Chief Treasurer</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Devansh Gupta
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Devansh Gupta"
+                            data-role="Chief Treasurer" data-dept="Finance & Treasury"
+                            data-bio="Devansh checks budget allocation limits and oversees overall conference auditing systems.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-pr.jpg" alt="PR Visual"></div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">PR Director</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Arjun Kapoor
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Arjun Kapoor"
+                            data-role="PR Director" data-dept="Public Relations"
+                            data-bio="Arjun directs external communications blueprints and institutional outreach parameters.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-design.jpg" alt="Creative Design Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Creative Head</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Ishaan Saxena
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Ishaan Saxena"
+                            data-role="Creative Head" data-dept="Design & Branding"
+                            data-bio="Ishaan maps core visual identity systems and user-experience guidelines for the team.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-tech.jpg" alt="Tech Infrastructure Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Tech Architecture Lead</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Hriday Reddy
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Hriday Reddy"
+                            data-role="Tech Architecture Lead" data-dept="Technology Systems"
+                            data-bio="Hriday pilots voting engine components and checks database operations security.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-delegate.jpg" alt="Relations Visual"></div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Relations Director</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Vivaan Shah
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Vivaan Shah"
+                            data-role="Relations Director" data-dept="Delegate Relations"
+                            data-bio="Vivaan manages country matrix generation filters and provides onboarding assistance.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-hospitality.jpg" alt="Hospitality Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Hospitality Manager</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Ranveer Singh
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Ranveer Singh"
+                            data-role="Hospitality Manager" data-dept="Hospitality & Catering"
+                            data-bio="Ranveer supervises structural guest housing layouts and out-of-station reception networks.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-security.jpg" alt="Safety Visual"></div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Safety Commander</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Yash Wardhan
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Yash Wardhan"
+                            data-role="Safety Commander" data-dept="Security & Control"
+                            data-bio="Yash institutes perimeter clearance checks and emergency exit navigation paths.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-photography.jpg" alt="Media Coverage Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Media Assets Chief</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Siddharth Sen
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Siddharth Sen"
+                            data-role="Media Assets Chief" data-dept="Photography & Film"
+                            data-bio="Siddharth organizes session layout imagery archives and frames high-speed event capture blocks.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/dept-international.jpg" alt="Press Team Visual">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <span class="member-role">Press Content Editor</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Vikram Roy
+                            </h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Vikram Roy"
+                            data-role="Press Content Editor" data-dept="International Press"
+                            data-bio="Vikram reviews newsletter layout engines, caricature validation checks, and daily publications.">View
+                            Profile</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="section-wrapper-toggleable" id="faculty-wrapper">
+        <section class="section">
+            <div class="faculty-grid">
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/faculty-1.jpg" alt="Dr. Alok Tripathi"></div>
+                    <div class="card-content">
+                        <div class="faculty-card-text">
+                            <span class="member-role">Senior Institutional Advisor</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Dr. Alok
+                                Tripathi</h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Dr. Alok Tripathi"
+                            data-role="Senior Institutional Advisor" data-dept="Faculty Board"
+                            data-bio="Dr. Tripathi maps long-term policy compliance guidelines and acts as key liaison with school boards.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/faculty-2.jpg" alt="Prof. Nalini Sharma"></div>
+                    <div class="card-content">
+                        <div class="faculty-card-text">
+                            <span class="member-role">Academic Coordinator</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Prof. Nalini
+                                Sharma</h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Prof. Nalini Sharma"
+                            data-role="Academic Coordinator" data-dept="Faculty Board"
+                            data-bio="Prof. Sharma supervises alignment with political science research methods and verifies event study guides.">View
+                            Profile</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-image-wrapper"><img src="assets/faculty-3.jpg" alt="Dr. Sandeep Verma"></div>
+                    <div class="card-content">
+                        <div class="faculty-card-text">
+                            <span class="member-role">Logistics Supervisor</span>
+                            <h3 style="color: var(--palette-indigo); font-size: 1.2rem; font-weight: 700;">Dr. Sandeep
+                                Verma</h3>
+                        </div>
+                        <button type="button" class="btn-card-outline trigger-modal-btn" data-name="Dr. Sandeep Verma"
+                            data-role="Logistics Supervisor" data-dept="Faculty Board"
+                            data-bio="Dr. Verma tracks space safety rules compliance and checks campus operations pipelines.">View
+                            Profile</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="fullscreen-modal-wrapper" id="ocDetailModal">
+        <div class="modal-container-plate">
+            <div class="modal-dismiss-btn" id="closeModalBtn">&times;</div>
+
+            <div class="modal-scroller-body">
+                <div class="modal-header-block">
+                    <span class="modal-badge" id="modalDeptTag">Department</span>
+                    <h2 id="modalMemberName">Member Name</h2>
+                    <p id="modalMemberRole"
+                        style="color: var(--palette-sky); font-weight: 700; margin-top: 0.3rem; font-size: 1.05rem;">
+                        Role Title</p>
+                </div>
+
+                <div class="modal-meta-section">
+                    <h4>Biography & Structural Contribution</h4>
+                    <p class="modal-desc-text" id="modalMemberBio">Detailed profile block information loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="mainFooter">
+        <div class="footer-content-wrapper">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="New MUN Logo" style="width: 60px; height: auto; margin-bottom: 1rem;"></img>
+                    <h2>NewMUN VIII</h2>
+                    <p>Empowering the next generation of leaders through debate, diplomacy, and collaboration.</p>
+                </div>
+                <div class="footer-links-col">
+                    <h3>Main Pages</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="councils.html">Councils</a></li>
+                        <li><a href="oc.html">The OC</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-col">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="resources.html">Study Guides</a></li>
+                        <li><a href="resources.html">Itinerary Matrix</a></li>
+                        <li><a href="resources.html">Rules Checklist</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-col">
+                    <h3>From the Organisers</h3>
+                    <ul>
+                        <li><a href="index.html#principal">Principal's Message</a></li>
+                        <li><a href="oc.html">The OC Board</a></li>
+                        <li><a href="https://instagram.com/">Instagram Portal</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 NewMUN VIII. All rights reserved.</p>
+                <p>Designed by Atharva</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 1. SELECTION INTERACTION STATE CONTROLLER
+        const showOcBtn = document.getElementById('show-oc-btn');
+        const showFacultyBtn = document.getElementById('show-faculty-btn');
+        const ocWrapper = document.getElementById('oc-wrapper');
+        const facultyWrapper = document.getElementById('faculty-wrapper');
+
+        showOcBtn.addEventListener('click', () => {
+            showOcBtn.classList.add('active');
+            showFacultyBtn.classList.remove('active');
+            ocWrapper.classList.add('visible');
+            facultyWrapper.classList.remove('visible');
+        });
+
+        showFacultyBtn.addEventListener('click', () => {
+            showFacultyBtn.classList.add('active');
+            showOcBtn.classList.remove('active');
+            facultyWrapper.classList.add('visible');
+            ocWrapper.classList.remove('visible');
+        });
+
+        // 2. PROFILE INTERACTION POP-UP SYSTEM
+        const profileModal = document.getElementById('ocDetailModal');
+        const mName = document.getElementById('modalMemberName');
+        const mRole = document.getElementById('modalMemberRole');
+        const mDept = document.getElementById('modalDeptTag');
+        const mBio = document.getElementById('modalMemberBio');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        document.querySelectorAll('.trigger-modal-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+
+                mName.innerText = target.getAttribute('data-name');
+                mRole.innerText = target.getAttribute('data-role');
+                mDept.innerText = target.getAttribute('data-dept');
+                mBio.innerText = target.getAttribute('data-bio');
+
+                profileModal.classList.add('active');
+                document.body.classList.add('modal-open');
+            });
+        });
+
+        function closePopUpModal() {
+            profileModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closePopUpModal);
+
+        window.addEventListener('click', (e) => {
+            if (e.target === profileModal) closePopUpModal();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && profileModal.classList.contains('active')) {
+                closePopUpModal();
+            }
+        });
+
+        // 3. SCROLL VISIBILITY HANDLERS (NAVBAR & BACKGROUND WATERMARK)
+        const mainNavbar = document.getElementById('mainNavbar');
+        const scrollingWatermark = document.getElementById('scrollingWatermark');
+        const heroHeader = document.getElementById('heroHeader');
+        const mainFooter = document.getElementById('mainFooter');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            // Navbar compact styling check
+            if (scrollTop > 50) {
+                mainNavbar.classList.add('scrolled');
+            } else {
+                mainNavbar.classList.remove('scrolled');
+            }
+
+            // Watermark Dynamic Visibility bounds calculation
+            const heroHeight = heroHeader.offsetHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const windowHeight = window.innerHeight;
+            const footerHeight = mainFooter.offsetHeight;
+
+            const scrolledPastHero = scrollTop > (heroHeight - 100);
+            const reachedNearFooter = scrollTop + windowHeight > (documentHeight - footerHeight + 100);
+
+            if (scrolledPastHero && !reachedNearFooter) {
+                scrollingWatermark.classList.add('visible');
+            } else {
+                scrollingWatermark.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+
+</html>
